@@ -108,6 +108,43 @@ app.post('/users', async (request, reply) => {
     }
  })
 
+ app.post('/products', async(request, reply) => {
+    const productsBodySchema = z.object({
+        name: z.string(),
+        price: z.string()
+    })
+
+    const {name, price} = productsBodySchema.parse(request.body)
+
+    const parsedPrice = parseFloat(price);
+
+   try {
+
+    await request.jwtVerify()
+
+    const user = await prisma.users.findUnique({
+        where:{
+            id: request.user.sub
+        }
+    })
+    if (!user){
+        return reply.status(409).send({message:'Esse usuario não existe'})
+    }
+
+    await prisma.products.create({
+        data:{
+            name,
+            price: parsedPrice,
+            userId: user.id
+        }
+    })
+    return reply.status(201).send()
+
+   }catch{
+    return reply.status(401).send({message: "Unauthorized."})
+   }
+})
+
 app.listen({
     host:'0.0.0.0',
     port: 3333

@@ -12,5 +12,16 @@ model Users{
   name String
   email String @unique
   password_hash String
-  
+  createdAt DateTime @default(now())
+  products Products []
+}
+
+model Products{
+  id String @id @default(uuid())
+  name String
+  price Float
+  createdAt DateTime @default(now())
+  userId String
+
+  user Users @relation(fields: [userId], references:[id])
 }
